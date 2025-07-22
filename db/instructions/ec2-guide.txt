@@ -65,6 +65,11 @@ UPDATE users SET role = 'admin' WHERE username = 'vamsi';
 
 exit
 sudo systemctl restart mysqld
+
+SHOW DATABASES;
+SHOW TABLES;
+SELECT * FROM users;
+ SELECT * FROM attendance;
 -------------------------------------------------------------------------------------------------------
 step 2 : go lang api service setup
 
