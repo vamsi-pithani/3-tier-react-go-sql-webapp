@@ -1,0 +1,81 @@
+# Node.js dependencies
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.js
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+/frontend/build
+/frontend/dist
+
+# Dependency directories
+/backend/vendor
+
+# Go build output
+/backend/*.exe
+/backend/*.exe~
+/backend/*.dll
+/backend/*.so
+/backend/*.dylib
+/backend/*.test
+/backend/*.out
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database files
+/db/*.db
+/db/*.sqlite
+
+# Ignore frontend build artifacts
+/frontend/build/
+/frontend/dist/
+
+# Ignore backend binaries
+/backend/bin/
+/backend/build/
+
+# Ignore coverage reports
+/coverage/
+/frontend/coverage/
+/backend/coverage/
+
+# Ignore logs
+*.log
+
+# Ignore npm debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore package-lock.json if you want, or keep it
+# package-lock.json
+
+# Ignore node_modules in frontend
+/frontend/node_modules/
+
+# Ignore Go modules cache
+/go/pkg/mod/
+
+# Ignore any other temporary files
+*.tmp
+*.temp
