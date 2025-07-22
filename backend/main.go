@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/rs/cors"
 )
 
 type Attendance struct {
@@ -35,7 +36,7 @@ var db *sql.DB
 func main() {
 	var err error
 	// Update the DSN with your MySQL credentials
-	dsn := "vamsi:Vamsi@1996!@tcp(65.2.70.107:3306)/attendance_db"
+	dsn := "vamsi:Vamsi@1996!@tcp(13.126.217.8:3306)/attendance_db"
 	db, err = sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal("Error connecting to database: ", err)
@@ -47,30 +48,21 @@ func main() {
 		log.Fatal("Cannot reach database: ", err)
 	}
 
-	http.HandleFunc("/attendance", corsMiddleware(attendanceHandler))
-	http.HandleFunc("/signup", corsMiddleware(signupHandler))
-	http.HandleFunc("/login", corsMiddleware(loginHandler))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/attendance", attendanceHandler)
+	mux.HandleFunc("/signup", signupHandler)
+	mux.HandleFunc("/login", loginHandler)
+
+	// Use rs/cors middleware to handle CORS
+	handler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://13.233.223.68", "http://localhost:3000"}, // Add your frontend origins here
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}).Handler(mux)
 
 	fmt.Println("Server started at :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
-
-func corsMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		origin := r.Header.Get("Origin")
-		if origin != "" {
-			w.Header().Set("Access-Control-Allow-Origin", origin)
-			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-			w.Header().Set("Access-Control-Allow-Credentials", "true")
-		}
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			// Do not call next handler for OPTIONS requests
-			return
-		}
-		next(w, r)
-	}
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
 
 func attendanceHandler(w http.ResponseWriter, r *http.Request) {
@@ -252,3 +244,4 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Login successful", "role": role, "userId": id, "email": email, "username": username})
 }
+
