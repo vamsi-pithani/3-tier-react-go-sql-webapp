@@ -1,0 +1,117 @@
+Setup On ec2:
+
+step1: mysql setup:
+sql commands histroy : cat ~/.mysql_history
+----------------------------------
+sudo wget https://dev.mysql.com/get/mysql80-community-release-el9-1.noarch.rpm 
+sudo dnf install mysql80-community-release-el9-1.noarch.rpm -y
+sudo rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
+sudo dnf install mysql-community-server -y
+sudo systemctl status mysqld
+sudo systemctl start mysqld
+sudo grep 'temporary password' /var/log/mysqld.log
+root@localhost: slodphspX9)t
+
+----> login and change password:
+mysql -u root -p
+ERROR 1820 (HY000): You must reset your password using ALTER USER statement before executing this statement.
+----> change the password:
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Vamsi@2025!';
+             ******************IMP***********************
+----> create a new user for database (CRUD) and the ip = backend host publicip  
+CREATE USER 'vamsi'@'13.126.217.8' IDENTIFIED BY 'Vamsi@2025!';
+GRANT ALL PRIVILEGES ON attendance_db.* TO 'vamsi'@'13.126.217.8';
+FLUSH PRIVILEGES;
+
+##### if we did mistake same process #### optional #################
+CREATE USER 'vamsi'@'3.110.166.206' IDENTIFIED BY 'Vamsi@2025!';
+GRANT ALL PRIVILEGES ON attendance_db.* TO 'vamsi'@'3.110.166.206';
+FLUSH PRIVILEGES;
+
+drop users
+DROP USER 'vamsi'@'106.222.234.188';
+#############################
+---> create relevant db here attendance_db
+CREATE DATABASE IF NOT EXISTS attendance_db;
+USE attendance_db;
+
+---> create table for users
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('student', 'admin') NOT NULL DEFAULT 'student'
+);
+
+---> 
+ALTER TABLE users
+ADD COLUMN role ENUM('student', 'admin') NOT NULL DEFAULT 'student';
+
+---> create attendence table
+
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    date DATE NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+converting user to admin is manually:
+UPDATE users SET role = 'admin' WHERE username = 'vamsi';
+
+exit
+sudo systemctl restart mysqld
+-------------------------------------------------------------------------------------------------------
+step 2 : go lang api service setup
+
+sudo yum update -y
+sudo yum install wget -y
+wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bash_profile
+echo 'export GOPATH=$HOME/go' >> ~/.bash_profile
+echo 'export PATH=$PATH:$GOPATH/bin' >> ~/.bash_profile
+source ~/.bash_profile
+go version
+yum install git
+git clone https://github.com/vamsi-pithani/3-tier-react-go-sql-webapp.git
+cd 3-tier-react-go-sql-webapp/
+ls
+cd backend/
+vi  main.go  and edit the file with dsn
+dsn := "vamsi:Vamsi@1996!@tcp(13.126.217.8:3306)/attendance_db"
+dsn := "user:password@tcp(databasehostip:3306)/attendance_db"
+go mod tidy  ### fix missing packages
+#### go get github.com/rs/cors
+go run main.go #### run the server.
+
+------------------------
+step3: react+nodejs server
+sudo -i
+curl -fsSL https://rpm.nodesource.com/setup_22.x | sudo bash -
+dnf install nodejs -y
+node -v
+cd frontend
+## change the react endpoints in frontend\src\App.js 
+### 4 places with go server/service ip i.e, backend ip
+npm install
+npm run build
+----> creates a bundle in  frontend folder as bundle
+install ngnix:
+sudo dnf install nginx -y
+dnf list installed | grep nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+systemctl status nginx
+ls
+
+## if we put bundle folder in html , we need to change the package.json 
+sudo rm -rf /usr/share/nginx/html/*
+sudo cp -r build/* /usr/share/nginx/html
+sudo systemctl restart nginx
+
+
